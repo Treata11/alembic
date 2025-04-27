@@ -19,6 +19,8 @@ install_manifest.txt
 *.so
 *.dll
 *.dylib
+*.framework
+*.xcframework
 *_Test
 *_Test_Jeffs
 SimpleAbcViewer
@@ -26,4 +28,4 @@ abcview
 build
 
 # Build Folder
-BUILD
+BUILD*

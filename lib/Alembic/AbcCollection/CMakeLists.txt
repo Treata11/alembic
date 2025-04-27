@@ -39,11 +39,15 @@ LIST(APPEND CXX_FILES
 )
 SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-INSTALL(FILES
+SET(ABC_COLLECTION_HEADRS
     All.h
     SchemaInfoDeclarations.h
     OCollections.h
     ICollections.h
+)
+
+INSTALL(FILES
+    ${ABC_COLLECTION_HEADRS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/AbcCollection
 )
 

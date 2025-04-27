@@ -70,6 +70,10 @@ OPTION(ALEMBIC_SHARED_LIBS "Build shared libraries" ON)
 OPTION(ALEMBIC_DEBUG_WARNINGS_AS_ERRORS "In debug mode build with warnings as errors" ON)
 SET(PYALEMBIC_PYTHON_MAJOR 3 CACHE STRING "Which major version of python to look for when building PyAlembic")
 
+IF (APPLE)
+    option(ALEMBIC_FRAMEWORK "Build as Apple Frameworks" OFF)
+ENDIF()
+
 option(DOCS_PATH
     "Create and install the HTML based API documentation to this location (requires Doxygen)"
     OFF)
@@ -148,6 +152,57 @@ ELSEIF (${DARWIN})
 ELSE()
     ADD_DEFINITIONS(-DPLATFORM_LINUX -DPLATFORM=LINUX)
 ENDIF()
+
+# if(ALEMBIC_FRAMEWORK)
+#   set(PUBLIC_HEADERS
+#     ${CMAKE_CURRENT_SOURCE_DIR}/src/lib/openjp2/openjpeg.h
+#     ${CMAKE_CURRENT_BINARY_DIR}/src/lib/openjp2/opj_config.h
+#   )
+#   message(STATUS "Public Headers: ${PUBLIC_HEADERS}\n")
+
+#   set(ALEMBIC_RESOURCEDIR "bin/openjp2.framework/Resources")
+#   message(STATUS "Resources directory: ${ALEMBIC_RESOURCEDIR}")
+#   # Define resource files for Apple Framework early to ensure scope
+#   set(ALEMBIC_RESOURCES
+#     "${CMAKE_CURRENT_SOURCE_DIR}/README.txt"
+#     "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt"
+#     "${CMAKE_CURRENT_SOURCE_DIR}/FEEDBACK.txt"
+#     "${CMAKE_CURRENT_BINARY_DIR}/lib/Alembic/AlembicConfigVersion.cmake"
+#     "${CMAKE_CURRENT_BINARY_DIR}/lib/Alembic/AlembicConfig.cmake"
+#     "${CMAKE_CURRENT_BINARY_DIR}/lib/Alembic/AlembicTargets.cmake"
+#     "${CMAKE_CURRENT_BINARY_DIR}/lib/Alembic/CTestTestfile.cmake"
+#     CACHE INTERNAL "Resource files for frameworks"
+#   )
+#   message(STATUS "Resource files: ${ALEMBIC_RESOURCES}\n")
+# endif()
+
+function(configure_alembic_framework libname)
+  if(ALEMBIC_FRAMEWORK)
+    message(STATUS "configure_ALEMBIC_FRAMEWORK called for ${libname}!\n")
+    set_target_properties(${libname} PROPERTIES
+      FRAMEWORK TRUE
+      FRAMEWORK_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+      PRODUCT_BUNDLE_IDENTIFIER "github.com/alembic/alembic/${libname}"
+      XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+    #   PUBLIC_HEADER "${PUBLIC_HEADERS}"
+      XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+      XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+      XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
+      MACOSX_FRAMEWORK_IDENTIFIER "github.com/alembic/alembic/${libname}"
+      MACOSX_FRAMEWORK_BUNDLE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
+      MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}"
+      MACOSX_RPATH TRUE
+    )
+
+    # # Manual approach for copying resources
+    # set(RES_DEST_DIR "$<TARGET_FILE_DIR:${libname}>/Resources")
+    # add_custom_command(TARGET ${libname} POST_BUILD
+    #   COMMAND ${CMAKE_COMMAND} -E make_directory "${RES_DEST_DIR}"
+    #   COMMAND ${CMAKE_COMMAND} -E copy ${ALEMBIC_RESOURCES} "${RES_DEST_DIR}/"
+    #   COMMENT "Copying resource files to ${libname}.framework/Resources"
+    # )
+  endif()
+endfunction()
 
 #-******************************************************************************
 # INSTALLATION
@@ -304,6 +359,7 @@ ENDMACRO()
 
 info_cfg_option(USE_ARNOLD)
 info_cfg_option(USE_BINARIES)
+info_cfg_option(ALEMBIC_FRAMEWORK)
 info_cfg_option(USE_EXAMPLES)
 info_cfg_option(USE_HDF5)
 info_cfg_option(USE_MAYA)

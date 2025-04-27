@@ -52,7 +52,7 @@ LIST(APPEND CXX_FILES
 )
 SET(CXX_FILES "${CXX_FILES}" PARENT_SCOPE)
 
-INSTALL(FILES
+SET(ABC_HEADERS
     All.h
     Base.h
     ErrorHandler.h
@@ -84,6 +84,10 @@ INSTALL(FILES
     SourceName.h
     TypedArraySample.h
     TypedPropertyTraits.h
+)
+
+INSTALL(FILES
+   ${ABC_HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/Alembic/Abc
 )
 
